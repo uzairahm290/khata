@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>بکروں کا کھاتہ</title>
+<meta name="theme-color" content="#161a44">
+<script>
+  try { var t = localStorage.getItem("khata-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="../fonts/jameel-noori-nastaleeq.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="farm.css">
+</head>
+<body>
+<div class="wrap" dir="rtl">
+
+  <div id="boot" class="boot">کھاتہ کھل رہا ہے…</div>
+
+  <!-- LOGIN -->
+  <section id="auth" class="auth" hidden>
+    <div class="auth-card">
+      <h1>بکروں کا کھاتہ</h1>
+      <p>بکریوں، بکروں، بھیڑوں اور بچوں کا حساب</p>
+      <form id="authForm" novalidate>
+        <label class="f" for="authEmail">ای میل
+          <input id="authEmail" type="email" autocomplete="email" required>
+        </label>
+        <label class="f" for="authPass">پاس ورڈ
+          <input id="authPass" type="password" autocomplete="current-password" minlength="6" required>
+        </label>
+        <button id="authBtn" class="primary" type="submit">داخل ہوں</button>
+        <p id="authMsg" class="msg" role="status"></p>
+      </form>
+      <p><a href="../">تمام کھاتے</a></p>
+    </div>
+  </section>
+
+  <!-- NO ACCESS -->
+  <section id="noAccess" class="auth" hidden>
+    <div class="auth-card">
+      <h1>رسائی نہیں ہے</h1>
+      <p>یہ اکاؤنٹ اس کھاتے میں شامل نہیں۔</p>
+      <button class="primary" data-logout type="button">باہر نکلیں</button>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <div id="app" class="wrap" hidden>
+    <header class="top">
+      <div>
+        <h1>بکروں کا کھاتہ</h1>
+        <div class="sub" id="todayLbl"></div>
+      </div>
+      <div class="tools">
+        <a class="tbtn" href="../" aria-label="تمام کھاتے" title="تمام کھاتے"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 11h2.8v9h5.2v-6h3v6h5.2v-9h2.8L12 3Z"/></svg></a>
+        <button id="themeBtn" class="tbtn" type="button" aria-label="روشن یا تاریک انداز" title="روشن / تاریک">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/></svg>
+        </button>
+        <button class="tbtn" data-logout type="button" aria-label="باہر نکلیں" title="باہر نکلیں"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-9v-2h9V5h-9V3Zm-1.6 4.6L9.8 9l-2 2H15v2H7.8l2 2-1.4 1.4L4 12l4.4-4.4Z"/></svg></button>
+      </div>
+    </header>
+
+    <div class="herd" id="herd"></div>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="dash">ڈیش بورڈ</button>
+      <button role="tab" aria-selected="false" data-tab="exp">خرچہ درج کریں</button>
+      <button role="tab" aria-selected="false" data-tab="ani">جانور</button>
+    </nav>
+
+    <section class="panel" id="p-dash">
+      <div class="monthbar">
+        <button class="iconbtn" id="mNext" type="button" aria-label="اگلا مہینہ">›</button>
+        <h2 id="mTitle"></h2>
+        <button class="iconbtn" id="mPrev" type="button" aria-label="پچھلا مہینہ">‹</button>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="grid2">
+        <div class="box">
+          <h3>روزانہ خرچہ</h3>
+          <p class="hint">مہینے کے ہر دن کا خرچہ</p>
+          <div class="chartwrap" id="dailyChart"></div>
+        </div>
+        <div class="box">
+          <h3>خرچہ کس چیز پر</h3>
+          <p class="hint">اس مہینے، قسم کے حساب سے</p>
+          <div class="bars" id="catBars"></div>
+        </div>
+      </div>
+      <div class="box">
+        <h3>فی جانور خرچہ</h3>
+        <p class="hint">سب جانوروں کا مشترکہ خرچہ (چارہ وغیرہ) موجود جانوروں میں برابر تقسیم، اور جو خرچہ کسی ایک جانور پر ہوا وہ صرف اسی کے حساب میں</p>
+        <div class="chartwrap" id="perAnimal"></div>
+      </div>
+      <div class="box">
+        <h3>پچھلے چھ مہینے</h3>
+        <div class="bars" id="monthBars"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-exp" hidden>
+      <div class="box">
+        <h3>نیا خرچہ</h3>
+        <form class="entry" id="expForm" autocomplete="off">
+          <div class="row">
+            <label class="f">رقم (روپے)
+              <input class="big" id="eAmt" type="number" inputmode="numeric" min="1" step="1" placeholder="0" required>
+            </label>
+            <label class="f">تاریخ
+              <input id="eDate" type="date" required>
+            </label>
+          </div>
+          <div class="f">کس چیز پر
+            <div class="chips" id="eCats"></div>
+          </div>
+          <div class="row">
+            <label class="f">کس جانور پر
+              <select id="eAnimal"></select>
+            </label>
+            <label class="f">تفصیل (اختیاری)
+              <input id="eNote" type="text" placeholder="مثلاً ۲ من بھوسہ">
+            </label>
+          </div>
+          <button class="primary" id="eSave" type="submit">محفوظ کریں</button>
+        </form>
+      </div>
+      <div class="box">
+        <h3>حالیہ خرچے</h3>
+        <div id="expList"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="p-ani" hidden>
+      <div class="box">
+        <h3>نیا جانور</h3>
+        <form class="entry" id="aniForm" autocomplete="off">
+          <div class="f">قسم
+            <div class="chips" id="aKinds"></div>
+          </div>
+          <div class="row">
+            <label class="f">نام یا نشانی
+              <input id="aName" type="text" placeholder="مثلاً کالی، کان پر نشان" required>
+            </label>
+            <label class="f">کب سے
+              <input id="aDate" type="date">
+            </label>
+          </div>
+          <label class="f">نوٹ (اختیاری)
+            <input id="aNote" type="text" placeholder="رنگ، عمر، کہاں سے لیا">
+          </label>
+          <button class="primary" type="submit">جانور شامل کریں</button>
+        </form>
+      </div>
+      <div class="box">
+        <h3>سارے جانور</h3>
+        <div class="alist" id="aniList"></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../config.js"></script>
+<script src="farm.js"></script>
+</body>
+</html>

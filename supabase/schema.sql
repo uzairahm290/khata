@@ -116,3 +116,41 @@ for each row execute function public.block_unlisted_signups();
 
 drop trigger if exists on_auth_user_created on auth.users;
 drop function if exists public.bootstrap_first_member();
+
+-- ---------------------------------------------------------------
+-- Migration: add_farm_khata_tables  (بکروں کا کھاتہ, served at /farm)
+-- Same members / is_member() as the madrassa tables, so one login opens both khatas.
+create table public.farm_animal (
+  id bigint generated always as identity primary key,
+  name text not null,
+  kind text not null check (kind in ('bakri','bakra','bheer','bacha')),
+  added_on date not null default current_date,
+  status text not null default 'active' check (status in ('active','sold','dead')),
+  note text,
+  created_by uuid default auth.uid() references auth.users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+create table public.farm_expense (
+  id bigint generated always as identity primary key,
+  entry_date date not null default current_date,
+  amount numeric(14,2) not null check (amount > 0),
+  category text not null,
+  animal_id bigint references public.farm_animal(id) on delete set null,
+  note text,
+  created_by uuid default auth.uid() references auth.users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+create index farm_expense_date_idx on public.farm_expense (entry_date desc);
+create index farm_expense_animal_idx on public.farm_expense (animal_id);
+create index farm_animal_created_by_idx on public.farm_animal (created_by);
+create index farm_expense_created_by_idx on public.farm_expense (created_by);
+alter table public.farm_animal enable row level security;
+alter table public.farm_expense enable row level security;
+create policy "members read farm_animal" on public.farm_animal for select to authenticated using ((select public.is_member()));
+create policy "members add farm_animal" on public.farm_animal for insert to authenticated with check ((select public.is_member()));
+create policy "members edit farm_animal" on public.farm_animal for update to authenticated using ((select public.is_member())) with check ((select public.is_member()));
+create policy "members delete farm_animal" on public.farm_animal for delete to authenticated using ((select public.is_member()));
+create policy "members read farm_expense" on public.farm_expense for select to authenticated using ((select public.is_member()));
+create policy "members add farm_expense" on public.farm_expense for insert to authenticated with check ((select public.is_member()));
+create policy "members edit farm_expense" on public.farm_expense for update to authenticated using ((select public.is_member())) with check ((select public.is_member()));
+create policy "members delete farm_expense" on public.farm_expense for delete to authenticated using ((select public.is_member()));
