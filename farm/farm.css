@@ -150,3 +150,20 @@ html,body{min-height:100%}
 .auth-card a{color:var(--green)}
 .boot{min-height:60vh;display:grid;place-items:center;color:var(--muted);text-align:center}
 div.f{display:grid;gap:4px;color:var(--muted);font-size:.95rem}
+
+/* --- fixes: full-width app inside the outer wrapper, and sizes tuned for Jameel Noori (it sets smaller than Noto) --- */
+.wrap > .wrap { width: 100%; max-width: none; margin: 0 }
+body { font-size: 20px; line-height: 1.95 }
+header.top h1 { font-size: 2.6rem }
+header.top .sub { font-size: 1.05rem }
+label.f, div.f { color: var(--ink); font-size: 1.05rem; gap: 6px }
+input[type=text], select { font-size: 1.1rem; padding: 6px 14px 10px }
+input::placeholder { color: var(--muted); opacity: .8 }
+.chips { gap: 10px }
+.chips span { font-size: 1.15rem; padding: 2px 20px 8px; min-width: 4.5em; text-align: center }
+nav.tabs button { font-size: 1.15rem; padding: 4px 22px 8px }
+.box { padding: 10px 20px 18px }
+.box h3 { font-size: 1.4rem }
+.primary { font-size: 1.25rem; padding: 6px 32px 12px }
+form.entry { gap: 16px }
+.herd .k, .stat .k { font-size: 1.05rem }
