@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>کھاتہ</title>
+<meta name="theme-color" content="#1b2235">
+<script>
+  try { var t = localStorage.getItem("khata-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<link rel="preload" href="fonts/jameel-noori-nastaleeq.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Layout: a title and two big doors, one per khata, each wearing its own khata's colours. */
+@font-face { font-family: "Jameel Noori Nastaleeq Web"; src: url("fonts/jameel-noori-nastaleeq.woff2") format("woff2"); font-display: swap; }
+:root {
+  --paper: #eceee9; --ink: #1b2235; --muted: #5b6170; --line: #d3d6d0;
+  --mad: #17302A; --mad-fg: #f3f6f1; --mad-accent: #c08a1a;
+  --farm: #161a44; --farm-fg: #eef0fb; --farm-accent: #e0584a;
+  --f-urdu: "Jameel Noori Nastaleeq Web", "Jameel Noori Nastaleeq", "Noto Nastaliq Urdu", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #0f1218; --ink: #e8eaf0; --muted: #9da3b3; --line: #262b36; --mad: #1d3a33; --farm: #1e2358; color-scheme: dark } }
+:root[data-theme="dark"] { --paper: #0f1218; --ink: #e8eaf0; --muted: #9da3b3; --line: #262b36; --mad: #1d3a33; --farm: #1e2358; color-scheme: dark }
+* { box-sizing: border-box }
+html, body { margin: 0; min-height: 100% }
+body { background: var(--paper); color: var(--ink); font-family: var(--f-urdu); line-height: 2.1;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: max(28px, env(safe-area-inset-top, 0px)); padding-bottom: max(28px, env(safe-area-inset-bottom, 0px)) }
+main { max-width: 880px; margin: 0 auto; display: grid; gap: 28px }
+.head { display: grid; gap: 0; text-align: center }
+.bism { margin: 0; color: var(--muted); font-size: 1.05rem }
+h1 { margin: 0; font-size: clamp(2.4rem, 7vw, 3.4rem); font-weight: 400; line-height: 1.8 }
+.head p { margin: 0; color: var(--muted) }
+.doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px }
+.door { position: relative; display: grid; gap: 6px; align-content: start; min-height: 260px; padding: 26px 24px 22px;
+  border-radius: 10px; text-decoration: none; overflow: hidden; transition: transform .15s ease, box-shadow .15s ease }
+.door:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -18px rgba(0,0,0,.5) }
+.door:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px }
+.door h2 { margin: 0; font-size: 2.1rem; font-weight: 400; line-height: 1.9 }
+.door p { margin: 0; font-size: 1.05rem; opacity: .85 }
+.door .go { margin-top: auto; padding-top: 18px; font-size: 1.15rem; display: flex; align-items: center; gap: 10px }
+.door .go svg { width: 22px; height: 22px; fill: currentColor; transform: scaleX(-1) }
+.door::before { content: ""; position: absolute; inset: 0 0 auto; height: 10px }
+.mad { background: var(--mad); color: var(--mad-fg) }
+.mad::before { background:
+  radial-gradient(circle at 10px 5px, var(--mad-accent) 2.5px, transparent 3px) 0 0 / 20px 10px,
+  linear-gradient(var(--mad-accent), var(--mad-accent)) 0 100% / 100% 1px no-repeat; opacity: .9 }
+.farm { background: var(--farm); color: var(--farm-fg) }
+.farm::before { background: repeating-linear-gradient(90deg, var(--farm-accent) 0 12px, var(--farm-fg) 12px 15px, #5d6cff 15px 27px, var(--farm-fg) 27px 30px) }
+.glyph { position: absolute; left: 18px; bottom: 14px; width: 110px; height: 110px; opacity: .12; fill: currentColor; pointer-events: none }
+.foot { text-align: center; color: var(--muted); font-size: .95rem; margin: 0 }
+@media (max-width: 640px) { .doors { grid-template-columns: minmax(0, 1fr) } .door { min-height: 200px } }
+@media (prefers-reduced-motion: reduce) { .door { transition: none } .door:hover { transform: none } }
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <p class="bism">بسم اللہ الرحمٰن الرحیم</p>
+    <h1>کھاتہ</h1>
+    <p>کون سا حساب کھولنا ہے؟</p>
+  </div>
+
+  <div class="doors">
+    <a class="door farm" href="farm/">
+      <h2>بکروں کا کھاتہ</h2>
+      <p>بکریاں، بکرے، بھیڑیں اور بچے۔ روزانہ اور مہینے کا خرچہ، اور ہر جانور کا الگ حساب۔</p>
+      <span class="go">کھولیں <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3 1.4-1.4Z"/></svg></span>
+      <svg class="glyph" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 22c-4-6-2-12 2-14-1 4 0 7 3 9 3-2 7-3 13-3 7 0 13 2 17 6 4 1 7 4 7 8 0 3-2 5-5 5l-2 13h-5l-1-9c-4 1-9 1-14 0l-1 9h-5l-2-12c-3-1-5-3-6-6-2 0-5-1-6-3 2 0 3-1 5-3Z"/></svg>
+    </a>
+    <a class="door mad" href="madrassa/">
+      <h2>مدرسہ کا کھاتہ</h2>
+      <p>آمدنی، اخراجات اور ہر مد کا بقایا۔ زکوٰۃ، صدقہ، فطرانہ اور باقی سب۔</p>
+      <span class="go">کھولیں <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3 1.4-1.4Z"/></svg></span>
+      <svg class="glyph" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4c2 4 6 6 6 11 0 2-1 4-2 5h12v6h4v34H12V26h4v-6h12c-1-1-2-3-2-5 0-5 4-7 6-11Zm0 26c-5 0-9 4-9 9v15h18V39c0-5-4-9-9-9Z"/></svg>
+    </a>
+  </div>
+
+  <p class="foot">دونوں کھاتوں کا لاگ اِن ایک ہی ہے۔</p>
+</main>
+</body>
+</html>
