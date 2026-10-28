@@ -8,10 +8,10 @@
 <script>
   try { var t = localStorage.getItem("khata-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
 </script>
-<link rel="preload" href="fonts/jameel-noori-nastaleeq.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/jameel-noori-nastaleeq.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* Layout: a title and two big doors, one per khata, each wearing its own khata's colours. */
-@font-face { font-family: "Jameel Noori Nastaleeq Web"; src: url("fonts/jameel-noori-nastaleeq.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Jameel Noori Nastaleeq Web"; src: url("/fonts/jameel-noori-nastaleeq.woff2") format("woff2"); font-display: swap; }
 :root {
   --paper: #eceee9; --ink: #1b2235; --muted: #5b6170; --line: #d3d6d0;
   --mad: #17302A; --mad-fg: #f3f6f1; --mad-accent: #c08a1a;
@@ -61,13 +61,13 @@ h1 { margin: 0; font-size: clamp(2.4rem, 7vw, 3.4rem); font-weight: 400; line-he
   </div>
 
   <div class="doors">
-    <a class="door farm" href="farm/">
+    <a class="door farm" href="/farm/">
       <h2>بکروں کا کھاتہ</h2>
       <p>بکریاں، بکرے، بھیڑیں اور بچے۔ روزانہ اور مہینے کا خرچہ، اور ہر جانور کا الگ حساب۔</p>
       <span class="go">کھولیں <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3 1.4-1.4Z"/></svg></span>
       <svg class="glyph" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 22c-4-6-2-12 2-14-1 4 0 7 3 9 3-2 7-3 13-3 7 0 13 2 17 6 4 1 7 4 7 8 0 3-2 5-5 5l-2 13h-5l-1-9c-4 1-9 1-14 0l-1 9h-5l-2-12c-3-1-5-3-6-6-2 0-5-1-6-3 2 0 3-1 5-3Z"/></svg>
     </a>
-    <a class="door mad" href="madrassa/">
+    <a class="door mad" href="/madrassa/">
       <h2>مدرسہ کا کھاتہ</h2>
       <p>آمدنی، اخراجات اور ہر مد کا بقایا۔ زکوٰۃ، صدقہ، فطرانہ اور باقی سب۔</p>
       <span class="go">کھولیں <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3 1.4-1.4Z"/></svg></span>

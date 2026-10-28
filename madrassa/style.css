@@ -2,7 +2,7 @@
    On phones the tabs move to a thumb bar at the bottom. */
 @font-face {
   font-family: "Jameel Noori Nastaleeq Web";
-  src: url("../fonts/jameel-noori-nastaleeq.woff2") format("woff2");
+  src: url("/fonts/jameel-noori-nastaleeq.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
