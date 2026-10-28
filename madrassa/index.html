@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>مدرسہ کھاتہ</title>
+<meta name="theme-color" content="#17302A">
+<script>
+  // apply the saved light/dark choice before anything paints
+  try { var t = localStorage.getItem("khata-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="../fonts/jameel-noori-nastaleeq.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="auth" class="auth" hidden>
+  <div class="auth-card">
+    <p class="auth-bism">بسم اللہ الرحمٰن الرحیم</p>
+    <h1 class="auth-title">مدرسہ کھاتہ</h1>
+    <p class="auth-sub">آمدنی، اخراجات اور بقایا کا مکمل حساب</p>
+    <form id="authForm" novalidate>
+      <label for="authEmail">ای میل</label>
+      <input id="authEmail" type="email" dir="ltr" autocomplete="email" required>
+      <label for="authPass">پاس ورڈ</label>
+      <input id="authPass" type="password" dir="ltr" autocomplete="current-password" minlength="6" required>
+      <button id="authBtn" class="btn btn-ink" type="submit">داخل ہوں</button>
+      <p id="authMsg" class="form-msg" role="status"></p>
+    </form>
+    <p class="auth-note">یہ کھاتہ صرف مدرسہ کے منظور شدہ افراد کے لیے ہے۔</p>
+    <p class="auth-note"><a class="auth-back" href="../">تمام کھاتے</a></p>
+  </div>
+</section>
+
+<!-- ============ NO ACCESS ============ -->
+<section id="noAccess" class="auth" hidden>
+  <div class="auth-card">
+    <h1 class="auth-title">رسائی نہیں ہے</h1>
+    <p class="auth-sub">یہ اکاؤنٹ اس کھاتے میں شامل نہیں۔ مدرسہ کے مہتمم سے رابطہ کریں۔</p>
+    <button class="btn btn-ink" data-logout type="button">باہر نکلیں</button>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" hidden>
+  <header class="masthead">
+    <div class="masthead-in">
+      <div class="mast-name">
+        <h1 id="madName">مدرسہ کا حساب</h1>
+        <button id="renameBtn" class="icon-btn" type="button" aria-label="مدرسہ کا نام بدلیں" title="نام بدلیں">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.2V20h2.8l8.3-8.3-2.8-2.8L4 17.2Zm13.7-7.6a1 1 0 0 0 0-1.4l-1.9-1.9a1 1 0 0 0-1.4 0l-1.3 1.3 2.8 2.8 1.8-0.8Z"/></svg>
+        </button>
+      </div>
+      <div class="mast-tools">
+        <a class="icon-btn" href="../" aria-label="تمام کھاتے" title="تمام کھاتے">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 11h2.8v9h5.2v-6h3v6h5.2v-9h2.8L12 3Z"/></svg>
+        </a>
+        <button id="themeBtn" class="icon-btn" type="button" aria-label="روشن یا تاریک انداز" title="روشن / تاریک">
+          <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+          <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+        </button>
+        <button class="icon-btn" data-logout type="button" aria-label="باہر نکلیں" title="باہر نکلیں">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-9v-2h9V5h-9V3Zm-1.6 4.6L9.8 9l-2 2H15v2H7.8l2 2-1.4 1.4L4 12l4.4-4.4Z"/></svg>
+        </button>
+      </div>
+      <p class="mast-date"><span id="hijri"></span><span class="mast-dot" aria-hidden="true">·</span><span id="greg"></span></p>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="حصے">
+    <div class="tabs-in">
+      <button class="tab" data-tab="dashboard" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg><span>خلاصہ</span></button>
+      <button class="tab" data-tab="income" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11.2l3.6-3.6L17 12l-5 5-5-5 1.4-1.4 3.6 3.6V3h0ZM5 19h14v2H5z"/></svg><span>آمدنی</span></button>
+      <button class="tab" data-tab="expense" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17V5.8L8.4 9.4 7 8l5-5 5 5-1.4 1.4L12 5.8V17h0ZM5 19h14v2H5z"/></svg><span>اخراجات</span></button>
+      <button class="tab" data-tab="compare" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10h3v10H4Zm6.5 0V4h3v16h-3ZM17 20v-7h3v7h-3Z"/></svg><span>موازنہ</span></button>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <!-- ======== DASHBOARD ======== -->
+    <section id="view-dashboard" class="view">
+      <div class="ledger-sum">
+        <div class="sum sum-in"><span class="sum-label">کل جمع</span><span class="sum-val" id="kIn">—</span></div>
+        <div class="sum sum-out"><span class="sum-label">کل خرچ</span><span class="sum-val" id="kOut">—</span></div>
+        <div class="sum sum-bal"><span class="sum-label">بقایا</span><span class="sum-val" id="kBal">—</span></div>
+      </div>
+      <p class="month-line" id="monthLine"></p>
+
+      <div class="grid-2">
+        <article class="panel">
+          <h2>مد وار بقایا</h2>
+          <p class="panel-note">ہر مد کی رقم اسی مد میں خرچ ہو۔ زکوٰۃ کی رقم صرف مستحق طلبہ پر۔</p>
+          <div class="scroll-x"><table class="tbl" id="fundTable">
+            <thead><tr><th>مد</th><th>جمع</th><th>خرچ</th><th>بقایا</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </article>
+
+        <article class="panel">
+          <h2>پچھلے چھ مہینے</h2>
+          <div class="legend"><span class="lg lg-in">جمع</span><span class="lg lg-out">خرچ</span></div>
+          <div id="chart" class="chart"></div>
+        </article>
+
+        <article class="panel">
+          <h2>خرچ کہاں ہوا</h2>
+          <div id="catBars" class="catbars"></div>
+        </article>
+
+        <article class="panel">
+          <h2>تازہ اندراج</h2>
+          <ul id="recent" class="recent"></ul>
+        </article>
+      </div>
+
+      <div class="export-row">
+        <button class="btn btn-line" id="csvBtn" type="button">پورا ریکارڈ ڈاؤن لوڈ کریں (Excel / CSV)</button>
+      </div>
+    </section>
+
+    <!-- ======== INCOME ======== -->
+    <section id="view-income" class="view" hidden>
+      <article class="panel entry entry-in">
+        <h2 id="incFormTitle">نئی آمدنی درج کریں</h2>
+
+        <div class="speak">
+          <button class="mic" data-mic="inc" type="button" aria-label="بول کر درج کریں">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-2.08A7 7 0 0 0 19 12h-2Z"/></svg>
+            <span>بول کر لکھوائیں</span>
+          </button>
+          <div class="speak-box">
+            <textarea id="incQuick" rows="2" placeholder="مثلاً: حاجی اکرم نے پچیس ہزار زکوٰۃ دی، بینک سے"></textarea>
+            <button class="mini" data-parse="inc" type="button">خانوں میں بھریں</button>
+          </div>
+        </div>
+        <p class="speak-msg" id="incSpeakMsg" role="status"></p>
+
+        <form id="incForm" class="fields" novalidate>
+          <div class="f"><label for="incName">کس نے دیا</label><input id="incName" placeholder="خالی چھوڑیں تو «گمنام»"></div>
+          <div class="f"><label for="incPhone">فون (اختیاری)</label><input id="incPhone" dir="ltr" inputmode="tel"></div>
+          <div class="f"><label for="incAmount">رقم (روپے)</label><input id="incAmount" dir="ltr" inputmode="numeric" required></div>
+          <div class="f"><label for="incFund">کس مد میں</label><select id="incFund"></select></div>
+          <div class="f"><label for="incMode">ذریعہ</label><select id="incMode"></select></div>
+          <div class="f"><label for="incDate">تاریخ</label><input id="incDate" type="date" dir="ltr"></div>
+          <div class="f f-wide"><label for="incNote">نوٹ</label><input id="incNote"></div>
+          <div class="f-actions">
+            <button class="btn btn-lapis" id="incSave" type="submit">محفوظ کریں</button>
+            <button class="btn btn-line" id="incCancel" type="button" hidden>چھوڑیں</button>
+            <p class="form-msg" id="incMsg" role="status"></p>
+          </div>
+        </form>
+      </article>
+
+      <article class="panel">
+        <div class="list-head">
+          <h2>آمدنی کا رجسٹر</h2>
+          <input id="incSearch" class="search" placeholder="نام، مد یا رسید نمبر سے تلاش">
+        </div>
+        <div class="scroll-x"><table class="tbl tbl-entries" id="incTable">
+          <thead><tr><th>رسید</th><th>تاریخ</th><th>نام</th><th>مد</th><th>ذریعہ</th><th>رقم</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </article>
+
+      <article class="panel">
+        <div class="list-head">
+          <div>
+            <h2>عطیہ دہندگان</h2>
+            <p class="panel-note">کسی نام پر دبائیں تو اس کا پورا ریکارڈ کھل جائے گا۔</p>
+          </div>
+          <input id="donorSearch" class="search" placeholder="نام یا فون سے تلاش">
+        </div>
+        <div class="scroll-x"><table class="tbl" id="donorTable">
+          <thead><tr><th>نام</th><th>عطیات</th><th>آخری بار</th><th>کل رقم</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </article>
+    </section>
+
+    <!-- ======== EXPENSE ======== -->
+    <section id="view-expense" class="view" hidden>
+      <article class="panel entry entry-out">
+        <h2 id="expFormTitle">نیا خرچ درج کریں</h2>
+
+        <div class="speak">
+          <button class="mic" data-mic="exp" type="button" aria-label="بول کر درج کریں">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-2.08A7 7 0 0 0 19 12h-2Z"/></svg>
+            <span>بول کر لکھوائیں</span>
+          </button>
+          <div class="speak-box">
+            <textarea id="expQuick" rows="2" placeholder="مثلاً: بجلی کا بل چھ ہزار پانچ سو دیا"></textarea>
+            <button class="mini" data-parse="exp" type="button">خانوں میں بھریں</button>
+          </div>
+        </div>
+        <p class="speak-msg" id="expSpeakMsg" role="status"></p>
+
+        <form id="expForm" class="fields" novalidate>
+          <div class="f"><label for="expCat">خرچ کس چیز پر</label><select id="expCat"></select></div>
+          <div class="f"><label for="expDetail">تفصیل</label><input id="expDetail" placeholder="مثلاً اکتوبر کا بل"></div>
+          <div class="f"><label for="expTo">کس کو دیا</label><input id="expTo"></div>
+          <div class="f"><label for="expAmount">رقم (روپے)</label><input id="expAmount" dir="ltr" inputmode="numeric" required></div>
+          <div class="f"><label for="expFund">کس مد سے</label><select id="expFund"></select></div>
+          <div class="f"><label for="expMode">ذریعہ</label><select id="expMode"></select></div>
+          <div class="f"><label for="expDate">تاریخ</label><input id="expDate" type="date" dir="ltr"></div>
+          <div class="f f-wide"><label for="expNote">نوٹ</label><input id="expNote"></div>
+          <div class="f-actions">
+            <button class="btn btn-madder" id="expSave" type="submit">محفوظ کریں</button>
+            <button class="btn btn-line" id="expCancel" type="button" hidden>چھوڑیں</button>
+            <p class="form-msg" id="expMsg" role="status"></p>
+          </div>
+        </form>
+      </article>
+
+      <article class="panel">
+        <div class="list-head">
+          <h2>اخراجات کا رجسٹر</h2>
+          <input id="expSearch" class="search" placeholder="تفصیل، مد یا واؤچر نمبر سے تلاش">
+        </div>
+        <div class="scroll-x"><table class="tbl tbl-entries" id="expTable">
+          <thead><tr><th>واؤچر</th><th>تاریخ</th><th>خرچ</th><th>کس کو</th><th>مد</th><th>رقم</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </article>
+    </section>
+    <!-- ======== COMPARE (month, day by day) ======== -->
+    <section id="view-compare" class="view" hidden>
+      <article class="panel cmp-bar">
+        <div class="cmp-month">
+          <button class="mini cmp-step" id="cmpNext" type="button" aria-label="اگلا مہینہ">اگلا ›</button>
+          <div class="f">
+            <label for="cmpMonth">مہینہ</label>
+            <select id="cmpMonth"></select>
+          </div>
+          <button class="mini cmp-step" id="cmpPrev" type="button" aria-label="پچھلا مہینہ">‹ پچھلا</button>
+        </div>
+        <div class="cmp-filters">
+          <div class="f">
+            <label for="cmpFund">مد</label>
+            <select id="cmpFund"></select>
+          </div>
+          <label class="check"><input type="checkbox" id="cmpOnlyActive"> صرف وہ دن جن میں اندراج ہوا</label>
+        </div>
+      </article>
+
+      <div class="ledger-sum cmp-sum">
+        <div class="sum"><span class="sum-label">پچھلا بقایا</span><span class="sum-val" id="cOpen">—</span></div>
+        <div class="sum sum-in"><span class="sum-label">اس مہینے جمع</span><span class="sum-val" id="cIn">—</span></div>
+        <div class="sum sum-out"><span class="sum-label">اس مہینے خرچ</span><span class="sum-val" id="cOut">—</span></div>
+        <div class="sum sum-bal"><span class="sum-label">مہینے کے آخر میں بقایا</span><span class="sum-val" id="cClose">—</span></div>
+      </div>
+
+      <article class="panel">
+        <div class="list-head">
+          <h2 id="cmpTitle">روزانہ موازنہ</h2>
+          <p class="panel-note cmp-hint">کسی دن پر دبائیں تو اس دن کے اندراج کھل جائیں گے۔</p>
+        </div>
+        <div class="scroll-x"><table class="tbl cmp-tbl" id="cmpTable">
+          <thead>
+            <tr class="cmp-groups">
+              <th rowspan="2">تاریخ</th>
+              <th colspan="2" class="g-day">اس دن</th>
+              <th colspan="2" class="g-run">اس تاریخ تک کل</th>
+              <th rowspan="2" class="g-bal">بقایا</th>
+            </tr>
+            <tr>
+              <th class="g-day">آمدنی</th><th class="g-day">خرچ</th>
+              <th class="g-run">آمدنی</th><th class="g-run">خرچ</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table></div>
+      </article>
+    </section>
+  </main>
+
+  <!-- rename dialog -->
+  <div id="renameBox" class="sheet" hidden>
+    <form id="renameForm" class="sheet-card">
+      <label for="renameInput">مدرسہ کا نام</label>
+      <input id="renameInput" required>
+      <div class="f-actions">
+        <button class="btn btn-ink" type="submit">محفوظ کریں</button>
+        <button class="btn btn-line" id="renameCancel" type="button">چھوڑیں</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="donorBox" class="sheet sheet-wide" hidden>
+    <div class="sheet-card donor-card" role="dialog" aria-modal="true" aria-labelledby="donorName">
+      <div class="donor-head">
+        <div>
+          <p class="eyebrow">عطیہ دہندہ کا ریکارڈ</p>
+          <h2 id="donorName"></h2>
+          <p class="muted" id="donorPhone"></p>
+        </div>
+        <button class="mini" id="donorClose" type="button">بند کریں</button>
+      </div>
+      <div class="donor-stats" id="donorStats"></div>
+      <div class="donor-grid">
+        <section>
+          <h3>مد وار</h3>
+          <div id="donorFunds" class="catbars"></div>
+        </section>
+        <section>
+          <h3>سال وار</h3>
+          <table class="tbl" id="donorYears"><thead><tr><th>سال</th><th>عطیات</th><th>رقم</th></tr></thead><tbody></tbody></table>
+        </section>
+      </div>
+      <section>
+        <h3>تمام عطیات</h3>
+        <div class="scroll-x"><table class="tbl" id="donorList">
+          <thead><tr><th>رسید</th><th>تاریخ</th><th>مد</th><th>ذریعہ</th><th>رقم</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+</div>
+
+<!-- printable receipt -->
+<div id="receipt" class="receipt" aria-hidden="true"></div>
+
+<div id="boot" class="boot">لوڈ ہو رہا ہے…</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
