@@ -246,3 +246,7 @@ table.per td.r{white-space:nowrap}
   #stats .wide{grid-column:1/-1}
   .stat .v{font-size:1.45rem}
 }
+
+/* animals tab summary */
+#aniStats{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:720px){ #aniStats{grid-template-columns:repeat(2,minmax(0,1fr))} #aniStats .wide{grid-column:1/-1} }

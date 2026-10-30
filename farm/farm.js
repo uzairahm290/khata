@@ -239,7 +239,16 @@
       <div class="stat main"><div class="k">کل لگایا (خرید + خرچہ)</div><div class="v">${money(allBuy + allExp)}</div></div>`
       + (missing ? `<p class="hint" style="grid-column:1/-1">${missing} جانوروں کی قیمت ابھی نہیں لکھی۔ "جانور" والے حصے میں "قیمت / تصویر" دبا کر لکھیں۔</p>` : "");
   }
-  function renderAll() { renderHerd(); renderDash(); renderWorth(); renderExpForm(); renderExpList(); renderAniList(); }
+  function renderAniStats() {
+    const buy = animals.reduce((t, a) => t + (Number(a.buyPrice) || 0), 0);
+    const exp = sum(expenses);
+    const noPrice = animals.filter((a) => a.buyPrice == null).length;
+    $("#aniStats").innerHTML = `
+      <div class="stat main"><div class="k">کل خرید</div><div class="v">${money(buy)}</div><div class="calc"><span class="num">${animals.length}</span> جانور${noPrice ? `، <span class="num">${noPrice}</span> کی قیمت باقی` : ""}</div></div>
+      <div class="stat main"><div class="k">اب تک کا کل خرچہ</div><div class="v">${money(exp)}</div><div class="calc">شروع سے آج تک</div></div>
+      <div class="stat wide"><div class="k">کل لاگت (خرید + خرچہ)</div><div class="v">${money(buy + exp)}</div></div>`;
+  }
+  function renderAll() { renderHerd(); renderDash(); renderWorth(); renderExpForm(); renderExpList(); renderAniStats(); renderAniList(); }
 
   // ---------- photos ----------
   const BUCKET = "farm-photos";
