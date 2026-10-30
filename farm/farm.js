@@ -114,7 +114,7 @@
 
     const rows = perAnimalFor(list);
     $("#perAnimal").innerHTML = rows.length
-      ? `<table class="per"><thead><tr><th>جانور</th><th>اپنا خرچہ</th><th>مشترکہ حصہ</th><th>کل</th></tr></thead><tbody>${rows.map((r) => `<tr><td><span class="pername">${thumb(r.a, "thumb xs")}${esc(r.a.name)}</span><span class="kindchip ${r.a.kind}">${KINDS[r.a.kind]?.one || ""}</span></td><td class="r">${money(r.d)}</td><td class="r">${money(r.s)}</td><td class="r"><b>${money(r.t)}</b></td></tr>`).join("")}</tbody></table>`
+      ? `<table class="per"><thead><tr><th>جانور</th><th class="brk">اپنا خرچہ</th><th class="brk">مشترکہ حصہ</th><th>کل (مہینہ)</th><th class="daily">روزانہ</th></tr></thead><tbody>${rows.map((r) => `<tr><td><span class="pername">${thumb(r.a, "thumb xs")}${esc(r.a.name)}</span><span class="kindchip ${r.a.kind}">${KINDS[r.a.kind]?.one || ""}</span></td><td class="r brk">${money(r.d)}</td><td class="r brk">${money(r.s)}</td><td class="r"><b>${money(r.t)}</b></td><td class="r daily"><b>${money(days ? r.t / days : 0)}</b><small>روز کا</small></td></tr>`).join("")}</tbody></table>`
       : `<div class="empty">پہلے "جانور" والے حصے میں جانور شامل کریں۔</div>`;
 
     const ms = []; for (let i = 5; i >= 0; i--) { const d = new Date(y, m - i, 1); ms.push({ y: d.getFullYear(), m: d.getMonth() }); }

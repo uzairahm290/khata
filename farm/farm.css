@@ -227,3 +227,12 @@ input.sr-only:focus-visible + .photo-pick, .photo-pick:focus-within{outline:3px 
 .aprice .num{white-space:nowrap}
 .aact .ghost{font-size:1.05rem;padding:4px 16px 8px;border-color:var(--green);color:var(--green)}
 .aact .ghost[aria-expanded="true"]{background:var(--green);color:var(--card)}
+
+/* per-animal daily column */
+table.per .daily{background:var(--haldi-soft);color:var(--haldi)}
+table.per th.daily{color:var(--haldi);border-radius:6px 6px 0 0}
+table.per td.daily{white-space:nowrap}
+table.per td.daily small{display:block;font-family:var(--f-urdu);font-size:.8rem;line-height:1.6;opacity:.8}
+@media (max-width:720px){ table.per th, table.per td{padding-inline:4px} }
+table.per td.r{white-space:nowrap}
+@media (max-width:560px){ table.per .brk{display:none} }
