@@ -89,7 +89,7 @@
       if (v > 0) b += `<rect x="${cx - bw / 2}" y="${H - B - h}" width="${bw}" height="${Math.max(h, 1.5)}" rx="1.5" fill="${col}"><title>${day} ${MONTHS[m]}: ${rs(v)}</title></rect>`;
       if (day === 1 || day % 5 === 0 || day === curDay) b += `<text x="${cx}" y="${H - B + 16}" font-size="11" text-anchor="middle" fill="${day === curDay ? "var(--haldi)" : "var(--muted)"}">${day}</text>`;
     });
-    $("#dailyChart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px;display:block" role="img" aria-label="روزانہ خرچہ">${g}<line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="var(--muted)" stroke-width="1"/>${b}</svg>`;
+    $("#dailyChart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px;display:block;direction:ltr" role="img" aria-label="روزانہ خرچہ">${g}<line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="var(--muted)" stroke-width="1"/>${b}</svg>`;
   }
   function renderDash() {
     const { y, m } = view; $("#mTitle").innerHTML = `${MONTHS[m]} <span class="num">${y}</span>`;
@@ -103,7 +103,8 @@
       <div class="stat main"><div class="k">آج کا خرچہ</div><div class="v">${money(today)}</div></div>
       <div class="stat main"><div class="k">اس مہینے کا خرچہ</div><div class="v">${money(total)}</div></div>
       <div class="stat"><div class="k">روزانہ اوسط</div><div class="v">${money(days ? total / days : 0)}</div></div>
-      <div class="stat"><div class="k">فی جانور (مہینہ)</div><div class="v">${money(act ? total / act : 0)}</div></div>`;
+      <div class="stat"><div class="k">فی جانور (مہینہ)</div><div class="v">${money(act ? total / act : 0)}</div></div>
+      <div class="stat main wide"><div class="k">فی جانور (روزانہ)</div><div class="v">${money(act && days ? total / act / days : 0)}</div><div class="calc">${money(act ? total / act : 0)} ÷ <span class="num">${days}</span> دن</div></div>`;
     renderDaily(list, y, m);
 
     const bc = {}; list.forEach((e) => (bc[e.cat] = (bc[e.cat] || 0) + e.amount));

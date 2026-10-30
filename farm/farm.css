@@ -236,3 +236,13 @@ table.per td.daily small{display:block;font-family:var(--f-urdu);font-size:.8rem
 @media (max-width:720px){ table.per th, table.per td{padding-inline:4px} }
 table.per td.r{white-space:nowrap}
 @media (max-width:560px){ table.per .brk{display:none} }
+
+/* top stats: 5th card (per animal per day) */
+#stats{grid-template-columns:repeat(5,minmax(0,1fr))}
+.stat .v .num{white-space:nowrap}
+.stat .calc{color:var(--muted);font-size:.9rem;line-height:1.6}
+@media (max-width:720px){
+  #stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #stats .wide{grid-column:1/-1}
+  .stat .v{font-size:1.45rem}
+}
