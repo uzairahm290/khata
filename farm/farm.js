@@ -22,7 +22,7 @@
   const money = (n) => `<span class="num">${rs(n)}</span>`;
   const urduDate = (s) => { const [y, m, d] = s.split("-").map(Number); return `<span class="num">${d}</span> ${MONTHS[m - 1]} <span class="num">${y}</span>`; };
 
-  let animals = [], expenses = [];
+  let animals = [], expenses = [], editId = null;
   let view = { y: new Date().getFullYear(), m: new Date().getMonth() };
 
   let tt;
@@ -114,7 +114,7 @@
 
     const rows = perAnimalFor(list);
     $("#perAnimal").innerHTML = rows.length
-      ? `<table class="per"><thead><tr><th>جانور</th><th>اپنا خرچہ</th><th>مشترکہ حصہ</th><th>کل</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.a.name)}<span class="kindchip ${r.a.kind}">${KINDS[r.a.kind]?.one || ""}</span></td><td class="r">${money(r.d)}</td><td class="r">${money(r.s)}</td><td class="r"><b>${money(r.t)}</b></td></tr>`).join("")}</tbody></table>`
+      ? `<table class="per"><thead><tr><th>جانور</th><th>اپنا خرچہ</th><th>مشترکہ حصہ</th><th>کل</th></tr></thead><tbody>${rows.map((r) => `<tr><td><span class="pername">${thumb(r.a, "thumb xs")}${esc(r.a.name)}</span><span class="kindchip ${r.a.kind}">${KINDS[r.a.kind]?.one || ""}</span></td><td class="r">${money(r.d)}</td><td class="r">${money(r.s)}</td><td class="r"><b>${money(r.t)}</b></td></tr>`).join("")}</tbody></table>`
       : `<div class="empty">پہلے "جانور" والے حصے میں جانور شامل کریں۔</div>`;
 
     const ms = []; for (let i = 5; i >= 0; i--) { const d = new Date(y, m - i, 1); ms.push({ y: d.getFullYear(), m: d.getMonth() }); }
@@ -134,25 +134,162 @@
     $("#expList").innerHTML = Object.entries(groups).map(([d, items]) => `<div class="daygroup"><div class="dh"><span>${urduDate(d)}</span><span>${money(sum(items))}</span></div>${items.map((e) => `<div class="item"><div class="what">${CATS[e.cat] || esc(e.cat)}<small>${e.animalId ? esc(byId[e.animalId]?.name || "پرانا جانور") : "سب جانور"}${e.note ? " · " + esc(e.note) : ""}</small></div><div class="amt">${money(e.amount)}</div><button class="ghost danger" type="button" data-del-exp="${e.id}">مٹائیں</button></div>`).join("")}</div>`).join("");
     $$("[data-del-exp]").forEach((b) => armButton(b, () => remove("farm_expense", b.dataset.delExp)));
   }
+  function thumb(a, cls = "thumb") {
+    const url = a.photoPath && photoUrls[a.photoPath];
+    return url
+      ? `<button class="${cls}" type="button" data-zoom="${a.id}" aria-label="تصویر بڑی کریں"><img src="${esc(url)}" alt="${esc(a.name)}" loading="lazy"></button>`
+      : `<span class="${cls} none ${a.kind}" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M14 22c-4-6-2-12 2-14-1 4 0 7 3 9 3-2 7-3 13-3 7 0 13 2 17 6 4 1 7 4 7 8 0 3-2 5-5 5l-2 13h-5l-1-9c-4 1-9 1-14 0l-1 9h-5l-2-12c-3-1-5-3-6-6-2 0-5-1-6-3 2 0 3-1 5-3Z"/></svg></span>`;
+  }
   function renderAniList() {
     if (!animals.length) { $("#aniList").innerHTML = `<div class="empty">کوئی جانور درج نہیں۔ اوپر قسم چن کر نام لکھیں۔</div>`; return; }
     const cost = {}; expenses.filter((e) => e.animalId).forEach((e) => (cost[e.animalId] = (cost[e.animalId] || 0) + e.amount));
     const order = { active: 0, sold: 1, dead: 2 };
     const list = [...animals].sort((a, b) => order[a.status] - order[b.status] || a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name));
-    $("#aniList").innerHTML = list.map((a) => `<div class="arow ${a.status !== "active" ? "gone" : ""}">
-      <div class="nm">${esc(a.name)}<span class="kindchip ${a.kind}">${KINDS[a.kind]?.one || ""}</span><small>${a.addedOn ? urduDate(a.addedOn) + " سے" : ""}${a.note ? " · " + esc(a.note) : ""}</small></div>
-      <div class="cost" title="اس جانور پر الگ سے ہونے والا خرچہ">${money(cost[a.id] || 0)}</div>
-      <select id="st-${a.id}" data-status="${a.id}" aria-label="حالت">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${a.status === k ? "selected" : ""}>${v}</option>`).join("")}</select>
-      <button class="ghost danger" type="button" data-del-ani="${a.id}">مٹائیں</button>
-    </div>`).join("");
-    $$("[data-status]").forEach((s) => s.addEventListener("change", async () => {
-      const { error } = await sb.from("farm_animal").update({ status: s.value }).eq("id", s.dataset.status);
-      if (error) { toast("تبدیل نہیں ہو سکا"); return; }
-      toast("تبدیل ہو گیا"); await loadAll();
-    }));
-    $$("[data-del-ani]").forEach((b) => armButton(b, () => remove("farm_animal", b.dataset.delAni)));
+    $("#aniList").innerHTML = list.map((a) => {
+      const price = [
+        `خرید: ${a.buyPrice != null ? money(a.buyPrice) : "<em>قیمت نہیں لکھی</em>"}`,
+        a.status === "sold" ? `فروخت: ${a.salePrice != null ? money(a.salePrice) : "<em>قیمت نہیں لکھی</em>"}` : "",
+        `اپنا خرچہ: ${money(cost[a.id] || 0)}`,
+      ].filter(Boolean).join("<i>·</i>");
+      const editing = editId === a.id;
+      return `<div class="acard ${a.status !== "active" ? "gone" : ""}">
+        ${thumb(a)}
+        <div class="ainfo">
+          <div class="aname">${esc(a.name)}<span class="kindchip ${a.kind}">${KINDS[a.kind]?.one || ""}</span>${a.status !== "active" ? `<span class="statechip">${STATUS[a.status]}</span>` : ""}</div>
+          <div class="aprice">${price}</div>
+          <small>${a.addedOn ? urduDate(a.addedOn) + " سے" : ""}${a.note ? " · " + esc(a.note) : ""}</small>
+        </div>
+        <div class="aact">
+          <button class="ghost" type="button" data-edit="${a.id}" aria-expanded="${editing}">${editing ? "بند کریں" : "قیمت / تصویر"}</button>
+        </div>
+        ${editing ? editPanel(a) : ""}
+      </div>`;
+    }).join("");
+    $$("[data-edit]").forEach((b) => b.addEventListener("click", () => { const id = Number(b.dataset.edit); editId = editId === id ? null : id; renderAniList(); }));
+    $$("[data-zoom]").forEach((b) => b.addEventListener("click", () => zoom(Number(b.dataset.zoom))));
+    if (editId != null) wireEdit();
   }
-  function renderAll() { renderHerd(); renderDash(); renderExpForm(); renderExpList(); renderAniList(); }
+  function editPanel(a) {
+    return `<form class="aedit" id="editForm" autocomplete="off">
+      <div class="row">
+        <label class="f">خریدنے کی قیمت
+          <input class="big" id="edBuy" type="number" inputmode="numeric" min="0" step="1" value="${a.buyPrice ?? ""}" placeholder="0">
+        </label>
+        <label class="f">حالت
+          <select id="edStatus">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${a.status === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+        </label>
+      </div>
+      <label class="f" id="edSaleWrap" ${a.status === "sold" ? "" : "hidden"}>کتنے کا بیچا
+        <input class="big" id="edSale" type="number" inputmode="numeric" min="0" step="1" value="${a.salePrice ?? ""}" placeholder="0">
+      </label>
+      <div class="f">تصویر
+        <div class="edphoto">
+          ${thumb(a, "thumb lg")}
+          <label class="photo-pick sm" for="edPhoto"><span id="edPhotoTxt">${a.photoPath ? "نئی تصویر لگائیں" : "تصویر لگائیں"}</span></label>
+          <input id="edPhoto" class="sr-only" type="file" accept="image/*">
+        </div>
+      </div>
+      <label class="f">نوٹ
+        <input id="edNote" type="text" value="${esc(a.note || "")}">
+      </label>
+      <div class="edbtns">
+        <button class="primary" id="edSave" type="submit">محفوظ کریں</button>
+        <button class="ghost danger" type="button" id="edDel">جانور مٹائیں</button>
+      </div>
+    </form>`;
+  }
+  function wireEdit() {
+    const a = animals.find((x) => x.id === editId); if (!a) { editId = null; return; }
+    $("#edStatus").addEventListener("change", () => { $("#edSaleWrap").hidden = $("#edStatus").value !== "sold"; if (!$("#edSaleWrap").hidden) $("#edSale").focus(); });
+    $("#edPhoto").addEventListener("change", () => { const f = $("#edPhoto").files[0]; $("#edPhotoTxt").textContent = f ? "چنی گئی: محفوظ کریں دبائیں" : "تصویر لگائیں"; });
+    armButton($("#edDel"), () => removeAnimal(a));
+    $("#editForm").addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const btn = $("#edSave"); btn.disabled = true; btn.textContent = "محفوظ ہو رہا ہے…";
+      const status = $("#edStatus").value;
+      const patch = {
+        buy_price: priceOrNull($("#edBuy").value),
+        sale_price: status === "sold" ? priceOrNull($("#edSale").value) : null,
+        status, note: $("#edNote").value.trim() || null,
+      };
+      const file = $("#edPhoto").files[0];
+      if (file) {
+        const path = await uploadPhoto(a.id, file);
+        if (!path) { btn.disabled = false; btn.textContent = "محفوظ کریں"; return; }
+        patch.photo_path = path;
+      }
+      const { error } = await sb.from("farm_animal").update(patch).eq("id", a.id);
+      if (error) { toast("محفوظ نہیں ہو سکا"); btn.disabled = false; btn.textContent = "محفوظ کریں"; return; }
+      if (file && a.photoPath) sb.storage.from(BUCKET).remove([a.photoPath]);
+      editId = null; toast("محفوظ ہو گیا"); await loadAll();
+    });
+  }
+  function renderWorth() {
+    const n = (v) => Number(v) || 0;
+    const activeBuy = sum(activeAnimals().map((a) => ({ amount: n(a.buyPrice) })));
+    const allBuy = sum(animals.map((a) => ({ amount: n(a.buyPrice) })));
+    const sold = sum(animals.filter((a) => a.status === "sold").map((a) => ({ amount: n(a.salePrice) })));
+    const allExp = sum(expenses);
+    const missing = animals.filter((a) => a.buyPrice == null).length;
+    $("#worth").innerHTML = `
+      <div class="stat"><div class="k">موجود جانوروں کی خرید</div><div class="v">${money(activeBuy)}</div></div>
+      <div class="stat"><div class="k">بیچ کر ملا</div><div class="v">${money(sold)}</div></div>
+      <div class="stat"><div class="k">شروع سے کل خرچہ</div><div class="v">${money(allExp)}</div></div>
+      <div class="stat main"><div class="k">کل لگایا (خرید + خرچہ)</div><div class="v">${money(allBuy + allExp)}</div></div>`
+      + (missing ? `<p class="hint" style="grid-column:1/-1">${missing} جانوروں کی قیمت ابھی نہیں لکھی۔ "جانور" والے حصے میں "قیمت / تصویر" دبا کر لکھیں۔</p>` : "");
+  }
+  function renderAll() { renderHerd(); renderDash(); renderWorth(); renderExpForm(); renderExpList(); renderAniList(); }
+
+  // ---------- photos ----------
+  const BUCKET = "farm-photos";
+  const photoUrls = {};
+  const priceOrNull = (v) => { const x = Number(v); return v === "" || !(x >= 0) ? null : Math.round(x); };
+  // shrink phone photos (often 4-8 MB) to ~1200px JPEG before upload
+  async function shrink(file) {
+    const MAX = 1200;
+    let src;
+    try { src = await createImageBitmap(file, { imageOrientation: "from-image" }); }
+    catch { src = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); }); }
+    const w = src.width, h = src.height, s = Math.min(1, MAX / Math.max(w, h));
+    const c = document.createElement("canvas"); c.width = Math.round(w * s); c.height = Math.round(h * s);
+    c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
+    return await new Promise((res) => c.toBlob(res, "image/jpeg", 0.82));
+  }
+  async function uploadPhoto(animalId, file) {
+    let blob;
+    try { blob = await shrink(file); } catch { toast("یہ تصویر کھل نہیں سکی، کوئی اور چنیں"); return null; }
+    const path = `${animalId}/${Date.now()}.jpg`;
+    const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: "image/jpeg", upsert: false });
+    if (error) { toast("تصویر اپ لوڈ نہیں ہو سکی"); return null; }
+    return path;
+  }
+  async function loadPhotoUrls() {
+    const need = animals.map((a) => a.photoPath).filter((p) => p && !photoUrls[p]);
+    if (!need.length) return;
+    const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(need, 60 * 60 * 6);
+    if (error || !data) return;
+    data.forEach((d) => { if (d.signedUrl) photoUrls[d.path] = d.signedUrl; });
+  }
+  function zoom(id) {
+    const a = animals.find((x) => x.id === id); const url = a && photoUrls[a.photoPath]; if (!url) return;
+    $("#lightImg").src = url; $("#lightImg").alt = a.name; $("#lightbox").hidden = false; $("#lightClose").focus();
+  }
+  const closeZoom = () => { $("#lightbox").hidden = true; $("#lightImg").removeAttribute("src"); };
+  $("#lightClose").addEventListener("click", closeZoom);
+  $("#lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox") closeZoom(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#lightbox").hidden) closeZoom(); });
+  async function removeAnimal(a) {
+    const { error } = await sb.from("farm_animal").delete().eq("id", a.id);
+    if (error) { toast("مٹایا نہیں جا سکا"); await loadAll(); return; }
+    if (a.photoPath) sb.storage.from(BUCKET).remove([a.photoPath]);
+    editId = null; toast("مٹا دیا"); await loadAll();
+  }
+  $("#aPhoto").addEventListener("change", () => {
+    const f = $("#aPhoto").files[0], img = $("#aPhotoPrev");
+    if (img.src) URL.revokeObjectURL(img.src);
+    if (f) { img.src = URL.createObjectURL(f); img.hidden = false; $("#aPhotoTxt").textContent = "تصویر بدلیں"; }
+    else { img.hidden = true; img.removeAttribute("src"); $("#aPhotoTxt").textContent = "تصویر لیں یا چنیں"; }
+  });
 
   // two taps to delete, so nothing goes by mistake
   function armButton(btn, action) {
@@ -167,13 +304,16 @@
   // ---------- data ----------
   async function loadAll() {
     const [a, e] = await Promise.all([
-      sb.from("farm_animal").select("id,name,kind,added_on,status,note").order("id"),
+      sb.from("farm_animal").select("id,name,kind,added_on,status,note,buy_price,sale_price,photo_path").order("id"),
       sb.from("farm_expense").select("id,entry_date,amount,category,animal_id,note,created_at").order("entry_date", { ascending: false }).order("created_at", { ascending: false }).limit(5000),
     ]);
     if (a.error || e.error) { toast("ڈیٹا نہیں آ سکا، انٹرنیٹ دیکھیں"); return; }
-    animals = a.data.map((r) => ({ id: r.id, name: r.name, kind: r.kind, addedOn: r.added_on, status: r.status, note: r.note }));
+    const numOrNull = (v) => (v == null ? null : Number(v));
+    animals = a.data.map((r) => ({ id: r.id, name: r.name, kind: r.kind, addedOn: r.added_on, status: r.status, note: r.note, buyPrice: numOrNull(r.buy_price), salePrice: numOrNull(r.sale_price), photoPath: r.photo_path }));
     expenses = e.data.map((r) => ({ id: r.id, date: r.entry_date, amount: Number(r.amount) || 0, cat: r.category, animalId: r.animal_id, note: r.note }));
     renderAll();
+    await loadPhotoUrls();
+    renderAniList();
   }
   async function remove(table, id) {
     const { error } = await sb.from(table).delete().eq("id", id);
@@ -200,12 +340,22 @@
   $("#aniForm").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const name = $("#aName").value.trim(); if (!name) { $("#aName").focus(); return; }
-    const { error } = await sb.from("farm_animal").insert({
+    const btn = $("#aSave"); btn.disabled = true;
+    const { data, error } = await sb.from("farm_animal").insert({
       name, kind: document.querySelector("input[name=akind]:checked").value,
       added_on: $("#aDate").value || todayStr(), note: $("#aNote").value.trim() || null,
-    });
-    if (error) { toast("محفوظ نہیں ہو سکا"); return; }
-    $("#aName").value = ""; $("#aNote").value = ""; toast("جانور شامل ہو گیا");
+      buy_price: priceOrNull($("#aPrice").value),
+    }).select("id").single();
+    if (error) { btn.disabled = false; toast("محفوظ نہیں ہو سکا"); return; }
+    const file = $("#aPhoto").files[0];
+    if (file) {
+      btn.textContent = "تصویر جا رہی ہے…";
+      const path = await uploadPhoto(data.id, file);
+      if (path) await sb.from("farm_animal").update({ photo_path: path }).eq("id", data.id);
+    }
+    btn.disabled = false; btn.textContent = "جانور شامل کریں";
+    $("#aName").value = ""; $("#aNote").value = ""; $("#aPrice").value = ""; $("#aPhoto").value = ""; $("#aPhoto").dispatchEvent(new Event("change"));
+    toast("جانور شامل ہو گیا");
     await loadAll();
   });
   $("#mPrev").addEventListener("click", () => { const d = new Date(view.y, view.m - 1, 1); view = { y: d.getFullYear(), m: d.getMonth() }; renderDash(); });

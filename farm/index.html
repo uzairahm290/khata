@@ -97,6 +97,11 @@
         <div class="chartwrap" id="perAnimal"></div>
       </div>
       <div class="box">
+        <h3>جانوروں کی قیمت کا حساب</h3>
+        <p class="hint">شروع سے اب تک: خرید، فروخت اور کل خرچہ</p>
+        <div class="stats" id="worth"></div>
+      </div>
+      <div class="box">
         <h3>پچھلے چھ مہینے</h3>
         <div class="bars" id="monthBars"></div>
       </div>
@@ -149,10 +154,22 @@
               <input id="aDate" type="date">
             </label>
           </div>
+          <div class="row">
+            <label class="f">خریدنے کی قیمت (روپے)
+              <input class="big" id="aPrice" type="number" inputmode="numeric" min="0" step="1" placeholder="0">
+            </label>
+            <div class="f">تصویر (اختیاری)
+              <label class="photo-pick" for="aPhoto">
+                <img id="aPhotoPrev" alt="" hidden>
+                <span id="aPhotoTxt">تصویر لیں یا چنیں</span>
+              </label>
+              <input id="aPhoto" class="sr-only" type="file" accept="image/*">
+            </div>
+          </div>
           <label class="f">نوٹ (اختیاری)
             <input id="aNote" type="text" placeholder="رنگ، عمر، کہاں سے لیا">
           </label>
-          <button class="primary" type="submit">جانور شامل کریں</button>
+          <button class="primary" id="aSave" type="submit">جانور شامل کریں</button>
         </form>
       </div>
       <div class="box">
@@ -163,6 +180,7 @@
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="lightbox" id="lightbox" hidden><img id="lightImg" alt=""><button class="tbtn" id="lightClose" type="button" aria-label="بند کریں">✕</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="/config.js"></script>
