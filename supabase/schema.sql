@@ -154,3 +154,20 @@ create policy "members read farm_expense" on public.farm_expense for select to a
 create policy "members add farm_expense" on public.farm_expense for insert to authenticated with check ((select public.is_member()));
 create policy "members edit farm_expense" on public.farm_expense for update to authenticated using ((select public.is_member())) with check ((select public.is_member()));
 create policy "members delete farm_expense" on public.farm_expense for delete to authenticated using ((select public.is_member()));
+
+-- ---------------------------------------------------------------
+-- Migration: farm_animal_price_and_photo
+-- Buy/sale price per animal, and one photo per animal in a private Storage bucket (members only).
+alter table public.farm_animal
+  add column buy_price numeric(14,2) check (buy_price is null or buy_price >= 0),
+  add column sale_price numeric(14,2) check (sale_price is null or sale_price >= 0),
+  add column photo_path text;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('farm-photos', 'farm-photos', false, 5242880, array['image/jpeg','image/png','image/webp'])
+on conflict (id) do nothing;
+create policy "members read farm photos" on storage.objects for select to authenticated
+  using (bucket_id = 'farm-photos' and (select public.is_member()));
+create policy "members add farm photos" on storage.objects for insert to authenticated
+  with check (bucket_id = 'farm-photos' and (select public.is_member()));
+create policy "members delete farm photos" on storage.objects for delete to authenticated
+  using (bucket_id = 'farm-photos' and (select public.is_member()));
